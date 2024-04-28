@@ -1,11 +1,33 @@
-import heapq as hq
+from heapq import heappush, heappop
 from time import perf_counter
 
 
-def find_shortest_flight_modified(flights, source, destination, friend_count=1):
+def find_shortest_flight_modified(flights, source, destination, friend_count):
+    # Check if arguments are valid
+    if not flights:
+        raise Exception("Flights not given")
+    if type(flights) is not list:
+        raise Exception("Flights must be a list")
+    if not source:
+        raise Exception("Source not given")
+    if type(source) is not str:
+        raise Exception("Source city code must be a string")
+    if not destination:
+        raise Exception("Destination not given")
+    if type(destination) is not str:
+        raise Exception("Destination city code must be a string")
+    if friend_count and type(friend_count) is int and friend_count < 1:
+        raise Exception("Group size must be a positive integer")
+
     city_code_to_index = {}
     index = 0
     for flight in flights:
+        if len(flight) != 3:
+            raise Exception("Flight must contain 3 elements: source, destination, and capacity")
+        if type(flight[0]) is not str or type(flight[1]) is not str:
+            raise Exception("City code must be a string")
+        if type(flight[2]) is not int:
+            raise Exception("Capacity must be an integer")
         for city in flight[:2]:
             if city not in city_code_to_index:
                 city_code_to_index[city] = index
@@ -20,28 +42,24 @@ def find_shortest_flight_modified(flights, source, destination, friend_count=1):
     for flight in flights:
         src_index = city_code_to_index[flight[0]]
         dest_index = city_code_to_index[flight[1]]
-        if len(flight) == 3:
-            capacity = int(flight[2])
-        else:
-            capacity = friend_count
-
+        capacity = int(flight[2])
         adj_list[src_index].append((dest_index, 1, capacity))
 
     pq = []
     src_index = city_code_to_index[source]
     dst_index = city_code_to_index[destination]
 
-    hq.heappush(pq, (0, src_index, friend_count))
+    heappush(pq, (0, src_index, friend_count))
 
     while pq:
-        cost, current, remaining_capacity = hq.heappop(pq)
+        cost, current, remaining_capacity = heappop(pq)
 
         if current == dst_index:
             return cost
 
         for next_index, next_cost, next_capacity in adj_list[current]:
             if next_capacity >= remaining_capacity:
-                hq.heappush(pq, (cost + next_cost, next_index, friend_count))
+                heappush(pq, (cost + next_cost, next_index, friend_count))
 
     return 0
 
