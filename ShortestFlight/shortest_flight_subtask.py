@@ -2,11 +2,11 @@ import heapq as hq
 from time import perf_counter
 
 
-def find_shortest_flight_modified(flights, source, destination, friend_count):
+def find_shortest_flight_modified(flights, source, destination, friend_count=1):
     city_code_to_index = {}
     index = 0
-    for flight in flights[:2]:
-        for city in flight:
+    for flight in flights:
+        for city in flight[:2]:
             if city not in city_code_to_index:
                 city_code_to_index[city] = index
                 index += 1
@@ -20,7 +20,11 @@ def find_shortest_flight_modified(flights, source, destination, friend_count):
     for flight in flights:
         src_index = city_code_to_index[flight[0]]
         dest_index = city_code_to_index[flight[1]]
-        capacity = int(flight[2])
+        if len(flight) == 3:
+            capacity = int(flight[2])
+        else:
+            capacity = friend_count
+
         adj_list[src_index].append((dest_index, 1, capacity))
 
     pq = []
